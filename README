@@ -1,0 +1,57 @@
+The whole system is based on ROS (Robotics Operating System) that uses TCP/IP protocols. 
+
+------------WRITERS---------------------------------
+The network consists of the following files:
+->json_buffer/src/JsonBuffer_writer.cpp - first node that sends asynchronously data
+->json_buffer/src/JsonBuffer_writer2.cpp - second node that sends asynchronously data
+
+Writers create a string that consists of:
+-> number
+-> bool value
+-> string- a Name draws from an array
+-> two strings- two draw names of fruits
+All data is separated by comma. Each WRITER sends one message at once.
+
+
+
+------------------READERS-------------------------------------
+->json_buffer/src/JsonBuffer_reader.cpp - first  node that sends asynchronously request to get json file
+->json_buffer/src/JsonBuffer_reader2.cpp - second  node that sends asynchronously request to get json file
+
+Readers send a request to Node (described below). The request message(a service ) contains amount of json files that we want to get. The return value is an array of  json data converted to string. Each READER has a defined macro of how many request at once should claim.
+
+
+-------------------------NODE--------------------------------------
+->json_buffer/src/JsonBuffer_node.cpp - a file that receive data from writers and waits for request from  Readers
+
+NODE receives data from WRITERS, convert them to json type and stack them in a  queue. The buffer size is defined in macro. When NODE gets and request from READER, then send the READER n requested json data. If in queue, there are less than n json objects, then it sends all of them. 
+
+
+---------------Message-Type-------------------------------------------
+->json_buffer/srv/ReturnJson.srv - is a file that tells what is the type of service (request, answer) data. In this case, Reader asks for 'number' of json strings and gets back an array 'string[] jsonFile'.
+--------------------CONFIGURATIONS---------------------------------------
+-> src/json_buffer/CMakeLists.txt
+-> src/json_buffer/package.xml
+
+Relevants files for compilation of all ROS nodes.
+
+To build  the system a whole 'json_buffer'  has to be copied to ROS workspace and then build. To run files write these commands:
+-> $ rosrun json_buffer Writer
+-> $ rosrun json_buffer Writer2
+-> $ rosrun json_buffer Node
+-> $ rosrun json_buffer Reader
+-> $ rosrun json_buffer Reader2
+
+
+----------------------------------------------------------------------
+The system was tested on 2 WRITERS, two READERS and one NODE.  It should also work for arbitrary amount of readers and writers. 'Arbitrary' depends on our computation power.
+
+REQUIREMENTS:
+
+->To use the system you need to have ROS installed. The nodes were tested under ROS Indigo on Ubuntu 14.04 LTS (http://wiki.ros.org/indigo/Installation/Ubuntu).
+
+-> JSON library (https://github.com/nlohmann/json) is utilized.
+
+-> System needs at least compiler gcc 4.9 or higher. The system was tested on gcc 5.5.
+
+
